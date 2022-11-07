@@ -75,6 +75,16 @@ functions:
       - http:
           path: /orders/{id}
           method: delete
+  updateObserver:
+    handler: functions/observe_order.handler
+    events:
+      - stream:
+          type: dynamodb
+          arn:
+            Fn::GetAtt:
+              - OrdersTable
+              - StreamArn
+          batchSize: 100
 
 resources: 
   Resources:
@@ -112,3 +122,5 @@ resources:
             Projection:
               ProjectionType: 'ALL'
         BillingMode: PAY_PER_REQUEST
+        StreamSpecification:
+          StreamViewType: NEW_AND_OLD_IMAGES
