@@ -12,7 +12,7 @@
 # Happy Coding!
 
 service: challenge5
-app: serverless-guru-challenge5
+app: challenge5
 org: lhidalgo
 
 frameworkVersion: '3'
@@ -22,7 +22,68 @@ provider:
   runtime: nodejs14.x
   stage: dev
   region: eu-central-1
+  apiGateway:
+    shouldStartNameWithService: true
+  environment:
+    DYNAMODB_TABLE: ${self:service}-${sls:stage}-OrdersTable
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Resource: "arn:aws:dynamodb:${aws:region}:*:table/${self:provider.environment.DYNAMODB_TABLE}"
+          Action:      
+            - dynamodb:Query
+            - dynamodb:Scan
+            - dynamodb:GetItem
+            - dynamodb:PutItem
+            - dynamodb:UpdateItem
+            - dynamodb:DeleteItem
 
 functions:
-  hello:
-    handler: handler.hello
+  create:
+    handler: functions/create_order.handler
+    events:
+      - http:
+          path: /orders
+          method: post
+          cors: true
+
+resources: 
+  Resources:
+    OrdersTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:provider.environment.DYNAMODB_TABLE}
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+          - AttributeName: coffeShopId
+            AttributeType: S
+          - AttributeName: userId
+            AttributeType: S
+          - AttributeName: createdAt
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        GlobalSecondaryIndexes:
+          - IndexName: UserIdIndex
+            KeySchema:
+              - AttributeName: userId
+                KeyType: HASH
+              - AttributeName: createdAt
+                KeyType: RANGE
+            Projection:
+              ProjectionType: 'ALL'
+          - IndexName: CoffeShopIdIndex
+            KeySchema:
+              - AttributeName: coffeShopId
+                KeyType: HASH
+              - AttributeName: createdAt
+                KeyType: RANGE
+            Projection:
+              ProjectionType: 'ALL'
+        TimeToLiveSpecification:
+          AttributeName: ttl
+          Enabled: true
+        BillingMode: PAY_PER_REQUEST
