@@ -73,9 +73,7 @@ module.exports.handler = (event, _, callback) => {
       // create a response
       const response = {
         statusCode: 200,
-        body: JSON.stringify({
-          data: result.Items,
-        }),
+        body: JSON.stringify({ data: result.Items }),
       };
       callback(null, response);
     });

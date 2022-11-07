@@ -59,6 +59,13 @@ functions:
           path: /orders
           method: get
           cors: true
+  get:
+    handler: functions/get_order.handler
+    events:
+      - http:
+          path: /orders/{id}
+          method: get
+          cors: true
 
 resources: 
   Resources:
