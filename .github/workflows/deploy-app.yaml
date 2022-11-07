@@ -1,0 +1,36 @@
+name: Deploy serverless app
+
+on: 
+  push:
+    branches:
+      - deploy-prod
+      - deploy-dev
+
+jobs:
+  deploy:
+    name: deploy
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [14.x]
+    steps:
+    - uses: actions/checkout@v2
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v1
+      with:
+        node-version: ${{ matrix.node-version }}
+    - name: Get branch name
+      uses: tj-actions/branch-names@v6
+      id: branch-name
+    - name: Sets Production stage
+      run: echo "STAGE=prod" >> $GITHUB_ENV
+      if: steps.branch-name.outputs.current_branch == "deploy-prod"
+    - name: Sets Development stage
+      run: echo "STAGE=dev" >> $GITHUB_ENV
+      if: steps.branch-name.outputs.current_branch == "deploy-dev"
+    - name: serverless deploy
+      uses: serverless/github-action@master
+      with:
+        args: deploy --stage ${{env.STAGE}}
+      env:
+        SERVERLESS_ACCESS_KEY: ${{secrets.SLS_KEY}}
