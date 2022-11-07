@@ -8,6 +8,9 @@ const dynamoDb = new AWS.DynamoDB.DocumentClient();
 module.exports.handler = (event, _, callback) => {
   const ISODateTime = new Date().toISOString();
   const data = JSON.parse(event.body);
+
+  // We validate the input of mandatory fields, all inputs should be a 
+  // non-empty String
   if (
     !(typeof data.coffeShopId === "string" && data.coffeShopId.length !== 0) ||
     !(typeof data.userId === "string" && data.userId.length !== 0) ||
@@ -22,6 +25,8 @@ module.exports.handler = (event, _, callback) => {
     return;
   }
 
+  // We prepare the parameters for the record creation.
+  // The fields id, status, createdAt and updatedAt are autopopulated.
   const params = {
     TableName: process.env.DYNAMODB_TABLE,
     Item: {
@@ -35,7 +40,7 @@ module.exports.handler = (event, _, callback) => {
     },
   };
 
-  // write the oreder to the database
+  // We write the new record to the data base
   dynamoDb.put(params, (error) => {
     // handle potential errors
     if (error) {

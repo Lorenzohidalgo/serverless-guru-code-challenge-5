@@ -5,6 +5,8 @@ const AWS = require("aws-sdk");
 const dynamoDb = new AWS.DynamoDB.DocumentClient();
 
 module.exports.handler = (event, _, callback) => {
+  // We validate the input of mandatory fields
+  // The id should be a non-empty String
   if (
     !(
       typeof event.pathParameters.id === "string" &&
@@ -20,6 +22,7 @@ module.exports.handler = (event, _, callback) => {
     return;
   }
 
+  // We prepare the parameters to fetch the record.
   const params = {
     TableName: process.env.DYNAMODB_TABLE,
     Key: {

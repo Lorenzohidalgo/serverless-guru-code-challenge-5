@@ -5,6 +5,8 @@ const AWS = require("aws-sdk");
 const dynamoDb = new AWS.DynamoDB.DocumentClient();
 
 module.exports.handler = (event, _, callback) => {
+  // We validate the input of mandatory fields
+  // The id should be a non-empty String
   if (
     !(
       typeof event.pathParameters.id === "string" &&
@@ -20,6 +22,7 @@ module.exports.handler = (event, _, callback) => {
     return;
   }
 
+  // We prepare the parameters to delete the record.
   const params = {
     TableName: process.env.DYNAMODB_TABLE,
     Key: {
@@ -27,7 +30,7 @@ module.exports.handler = (event, _, callback) => {
     },
   };
 
-  // delete the todo from the database
+  // delete the order from the database
   dynamoDb.delete(params, (error) => {
     // handle potential errors
     if (error) {
@@ -35,7 +38,7 @@ module.exports.handler = (event, _, callback) => {
       callback(null, {
         statusCode: error.statusCode || 501,
         headers: { "Content-Type": "text/plain" },
-        body: "Couldn't remove the todo item.",
+        body: "Couldn't remove the order item.",
       });
       return;
     }

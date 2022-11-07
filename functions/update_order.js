@@ -10,6 +10,9 @@ module.exports.handler = (event, _, callback) => {
   const ISODateTime = new Date().toISOString();
   const data = JSON.parse(event.body);
 
+  // We validate the input of mandatory fields
+  // The id should be a non-empty String
+  // The new status should be one of the approved ones `PossibleOrderStatus`
   if (
     !(
       typeof data.status === "string" &&
@@ -29,6 +32,8 @@ module.exports.handler = (event, _, callback) => {
     return;
   }
 
+  // We prepare the parameters to update the record.
+  // `updatedAt` is also updated.
   const params = {
     TableName: process.env.DYNAMODB_TABLE,
     Key: {
@@ -41,8 +46,7 @@ module.exports.handler = (event, _, callback) => {
       ":status": data.status,
       ":updatedAt": ISODateTime,
     },
-    UpdateExpression:
-      "SET #status = :status, updatedAt = :updatedAt",
+    UpdateExpression: "SET #status = :status, updatedAt = :updatedAt",
     ReturnValues: "ALL_NEW",
   };
 
@@ -58,12 +62,12 @@ module.exports.handler = (event, _, callback) => {
       });
       return;
     }
-    
+
     console.log(result);
     // create a response
     const response = {
       statusCode: 200,
-      body: JSON.stringify({data: result.Attributes}),
+      body: JSON.stringify({ data: result.Attributes }),
     };
     callback(null, response);
   });

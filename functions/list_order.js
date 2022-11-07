@@ -9,12 +9,23 @@ module.exports.handler = (event, _, callback) => {
     TableName: process.env.DYNAMODB_TABLE,
   };
 
+  // This handler accepts `coffeShopId` or `userId` as input to
+  // simulate how the data could be fetched depending on the
+  // authenticated user / api-key.
+  //
+  // If the request comes from a CoffeShop terminal, the handler 
+  // will fetch only the order for that shop by querying by `CoffeShopIdIndex`
+  //
+  // If the request comes from a end customer terminal, the handler
+  // will fetch only the orders made by that customer querying by `UserIdIndex`
+  //
+  // If no `queryStringParameters` are provided, the handler will
+  // fetch and return all the orders.
   if (event.queryStringParameters != null) {
     if (
       typeof event.queryStringParameters.coffeShopId === "string" &&
       event.queryStringParameters.coffeShopId.length !== 0
     ) {
-      console.log("found coffeShopId");
       params.IndexName = "CoffeShopIdIndex";
       params.KeyConditionExpression = "coffeShopId = :coffeShopId";
       params.ExpressionAttributeValues = {
@@ -24,7 +35,6 @@ module.exports.handler = (event, _, callback) => {
       typeof event.queryStringParameters.userId === "string" &&
       event.queryStringParameters.userId.length !== 0
     ) {
-      console.log("found userId");
       params.IndexName = "UserIdIndex";
       params.KeyConditionExpression = "userId = :userId";
       params.ExpressionAttributeValues = {

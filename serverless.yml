@@ -29,6 +29,7 @@ provider:
   iam:
     role:
       statements:
+        # Basic IAM permissions
         - Effect: Allow
           Resource: "arn:aws:dynamodb:${aws:region}:*:table/${self:provider.environment.DYNAMODB_TABLE}"
           Action:      
@@ -38,6 +39,8 @@ provider:
             - dynamodb:PutItem
             - dynamodb:UpdateItem
             - dynamodb:DeleteItem
+        
+        # Permissions needed to query and scan the created indexes
         - Effect: Allow
           Resource: "arn:aws:dynamodb:${aws:region}:*:table/${self:provider.environment.DYNAMODB_TABLE}/index/*"
           Action:      
@@ -45,39 +48,53 @@ provider:
             - dynamodb:Scan
 
 functions:
+  # API GateWay Handlers:
+  # 
+  # Order creation
   create:
     handler: functions/create_order.handler
     events:
       - http:
           path: /orders
           method: post
+  # Orders fetching
   list:
     handler: functions/list_order.handler
     events:
       - http:
           path: /orders
           method: get
+  # Fetch a specific order
   get:
     handler: functions/get_order.handler
     events:
       - http:
           path: /orders/{id}
           method: get
+  # Update a specific order
   update:
     handler: functions/update_order.handler
     events:
       - http:
           path: /orders/{id}
           method: put
+  # Delete a specific order
   delete:
     handler: functions/delete_order.handler
     events:
       - http:
           path: /orders/{id}
           method: delete
+
+  # DynamoDB Stream Observer
+  #
+  # A handler has been added to listen and react to 
+  # changes on the data base
   updateObserver:
     handler: functions/observe_order.handler
     events:
+      # Unlike the other handlers, this function is
+      # triggered by changes made to the dynamoDB table
       - stream:
           type: dynamodb
           arn:
@@ -88,9 +105,11 @@ functions:
 
 resources: 
   Resources:
+    # DynamoDB Table used by the Rest API
     OrdersTable:
       Type: AWS::DynamoDB::Table
       Properties:
+        # A new Table will be created for each environment
         TableName: ${self:provider.environment.DYNAMODB_TABLE}
         AttributeDefinitions:
           - AttributeName: id
@@ -101,9 +120,12 @@ resources:
             AttributeType: S
           - AttributeName: createdAt
             AttributeType: S
+        # `id` is used as primary key
         KeySchema:
           - AttributeName: id
             KeyType: HASH
+        # GSIs have been set up to list the items based on 
+        # the user or coffee shop id.
         GlobalSecondaryIndexes:
           - IndexName: UserIdIndex
             KeySchema:
@@ -122,5 +144,8 @@ resources:
             Projection:
               ProjectionType: 'ALL'
         BillingMode: PAY_PER_REQUEST
+        # A Stream is configured to trigger a lambda functions
+        # New and Old images are return to enable the comparison
+        # between the different versions
         StreamSpecification:
           StreamViewType: NEW_AND_OLD_IMAGES
