@@ -38,6 +38,11 @@ provider:
             - dynamodb:PutItem
             - dynamodb:UpdateItem
             - dynamodb:DeleteItem
+        - Effect: Allow
+          Resource: "arn:aws:dynamodb:${aws:region}:*:table/${self:provider.environment.DYNAMODB_TABLE}/index/*"
+          Action:      
+            - dynamodb:Query
+            - dynamodb:Scan
 
 functions:
   create:
@@ -46,6 +51,13 @@ functions:
       - http:
           path: /orders
           method: post
+          cors: true
+  list:
+    handler: functions/list_order.handler
+    events:
+      - http:
+          path: /orders
+          method: get
           cors: true
 
 resources: 
