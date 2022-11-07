@@ -69,6 +69,12 @@ functions:
       - http:
           path: /orders/{id}
           method: put
+  delete:
+    handler: functions/delete_order.handler
+    events:
+      - http:
+          path: /orders/{id}
+          method: delete
 
 resources: 
   Resources:
@@ -105,7 +111,4 @@ resources:
                 KeyType: RANGE
             Projection:
               ProjectionType: 'ALL'
-        TimeToLiveSpecification:
-          AttributeName: ttl
-          Enabled: true
         BillingMode: PAY_PER_REQUEST
