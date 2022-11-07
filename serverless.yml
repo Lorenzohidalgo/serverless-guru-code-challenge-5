@@ -51,21 +51,24 @@ functions:
       - http:
           path: /orders
           method: post
-          cors: true
   list:
     handler: functions/list_order.handler
     events:
       - http:
           path: /orders
           method: get
-          cors: true
   get:
     handler: functions/get_order.handler
     events:
       - http:
           path: /orders/{id}
           method: get
-          cors: true
+  update:
+    handler: functions/update_order.handler
+    events:
+      - http:
+          path: /orders/{id}
+          method: put
 
 resources: 
   Resources:
