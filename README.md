@@ -65,7 +65,7 @@ All records in the table should have the following Attributes (all Strings):
 The lambda function that handles the record creation is located at `functions/create_order.js` and is triggered by the API GateWay when a `POST` call is made to the `/orders` path.
 
 The `POST` call `body` should include the following `String` variables:
-coffeShopId: Coffee Shop ID
+* **coffeShopId**: Coffee Shop ID
 * **userId**: User ID
 * **order**: Text with your order
 
@@ -144,8 +144,8 @@ For Example, we could replace the current `console.log` statements to trigger pu
 As per the challenges requisites, the CI/CD Pipeline has been configured using GitHub Actions.
 
 Two different actions have been developed and can be located in the `.github/workflows` folder:
-deploy-dev-app.yaml: To deploy the application to the Development Stage
-deploy-prod-app.yaml: To deploy the application to the Production Stage.
+* **deploy-dev-app.yaml**: To deploy the application to the Development Stage
+* **deploy-prod-app.yaml**: To deploy the application to the Production Stage.
 
 The main difference between both files is teh trigger and the value passed as `--stage` when executing the `deploy` command, but have been kept in different files since they would have more differences on a real life project.
 
